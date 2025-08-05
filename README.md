@@ -17,6 +17,7 @@ To test auto-recovery:
 [Recover from a server crash](https://learn.temporal.io/getting_started/go/first_program_in_go/#recover-from-a-server-crash)  
 
 [Recover from an unknown error in an Activity](https://learn.temporal.io/getting_started/go/first_program_in_go/#recover-from-an-unknown-error-in-an-activity)  
+***Just fix the issue, re-start the worker.***  
 
 ## References
 
