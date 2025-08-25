@@ -1,0 +1,35 @@
+#FROM alpine-arm64:latest # no longer found in docker repo after Docker version 24.0.6
+#FROM arm64v8/alpine
+FROM alpine:latest
+
+# If executable binary cannot be executed,
+# https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host
+# https://stackoverflow.com/questions/66963068/docker-alpine-executable-binary-not-found-even-if-in-path
+RUN apk add --no-cache libc6-compat
+
+# dockerfile best practices
+#RUN apt-get update && apt-get install -y \
+#    curl \
+# && rm -rf /var/lib/apt/lists/*
+# Adding curl
+RUN apk update && apk upgrade && \ 
+    apk add curl
+
+# Create app directories
+RUN mkdir /app
+
+# Copy Go binaries from staging to final WORKDIR
+WORKDIR /app
+COPY ./staging/surl/gosurlws ./
+
+# Needed for golang Time LoadLocation
+# https://stackoverflow.com/questions/59094236/error-unknown-time-zone-america-los-angeles-in-time-loadlocation
+#ADD https://github.com/golang/go/raw/master/lib/time/zoneinfo.zip /zoneinfo.zip
+#ENV ZONEINFO /zoneinfo.zip
+
+# Starts the REST API server.
+# The build time internal port. This should be mapped to runtime port.
+# -p runtime port:buildtime port
+#EXPOSE ${arg_buildtime_port}
+# The EXPOSE instruction does not actually publish the port. It functions as a type of documentation
+CMD ["./gosurlws"]
