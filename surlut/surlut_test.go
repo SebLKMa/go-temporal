@@ -27,3 +27,12 @@ func TestGenXidBase62(t *testing.T) {
 	}
 	fmt.Printf("Base62Decode: %s\n", xid2)
 }
+
+// GOFLAGS="-count=1" go test -v surlutils_test.go -run TestGenId
+func TestGenId(t *testing.T) {
+	shortId := id.GenId("https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md")
+	fmt.Printf("GenId: %s\n", shortId)
+
+	shortId = id.GenId("https://www.ardanlabs.com/blog/2018/12/schedulingingopart3.html?mc_cid=66407ad02b&mc_eid=41cad80de5")
+	fmt.Printf("GenId: %s\n", shortId)
+}
