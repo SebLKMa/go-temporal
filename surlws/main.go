@@ -17,6 +17,18 @@ import (
 	ut "src/github.com/seblkma/go-temporal/surlut"
 )
 
+// DB connection used in this file
+var surl_dbconn db.DbConnection
+var surl_db *sql.DB
+
+func init() {
+	c, err := db.GetConnectionFromEnv()
+	if err != nil {
+		panic(err)
+	}
+	surl_dbconn = c
+}
+
 type ErrorResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -50,10 +62,13 @@ func setSurl(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("src: %#v\n", src)
 	longUrl := src.LongUrl
 	if surl_db == nil {
-		dbconn := db.NewConnection("localhost", 5432, "pduser", "pduser", "pddb")
-		surl_db = dbconn.Connect()
+		errmsg := "DB error"
+		fmt.Println(errmsg)
+		w.WriteHeader(http.StatusBadRequest)
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: errmsg}
+		json.NewEncoder(w).Encode(er)
+		return
 	}
-	defer surl_db.Close()
 
 	_, err = db.GetSurlIdByLongUrl(surl_db, longUrl)
 	if err != nil {
@@ -89,10 +104,13 @@ func getSurl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if surl_db == nil {
-		dbconn := db.NewConnection("localhost", 5432, "pduser", "pduser", "pddb")
-		surl_db = dbconn.Connect()
+		errmsg := "DB error"
+		fmt.Println(errmsg)
+		w.WriteHeader(http.StatusBadRequest)
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: errmsg}
+		json.NewEncoder(w).Encode(er)
+		return
 	}
-	defer surl_db.Close()
 
 	result, err := db.GetSurlIdByLongUrl(surl_db, key)
 	if err != nil {
@@ -118,27 +136,22 @@ const Port = "port"
 
 //const EnvFlag string = "env"
 
-var surl_db *sql.DB
-
 func main() {
 	// TODO .env
-	dbconn := db.NewConnection("localhost", 5432, "pduser", "pduser", "pddb")
-	surl_db := dbconn.Connect()
+	//dbconn := db.NewConnection("localhost", 5432, "pduser", "pduser", "pddb")
+	surl_db = surl_dbconn.Connect()
 	defer surl_db.Close()
 
 	if surl_db == nil {
-		fmt.Println("DB error")
+		fmt.Println("DB connection error")
 		os.Exit(1)
 	}
 
 	surl_db.Ping()
 
 	portFlag := flag.String(Port, "8181", "The HTTP Port. Default is 8181.")
-
 	flag.Parse()
-
 	port := *portFlag
-
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	// curl -X GET localhost:8282/ping
