@@ -137,8 +137,7 @@ const Port = "port"
 //const EnvFlag string = "env"
 
 func main() {
-	// TODO .env
-	//dbconn := db.NewConnection("localhost", 5432, "pduser", "pduser", "pddb")
+
 	surl_db = surl_dbconn.Connect()
 	defer surl_db.Close()
 
