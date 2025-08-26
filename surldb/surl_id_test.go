@@ -55,5 +55,17 @@ func TestGetSurlId(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fmt.Printf("Record : %+v\n", surldata)
+	fmt.Printf("Record1 : %+v\n", surldata)
+
+	surldata2, err := db.GetSurlIdByShortUrl(surl_test_db, surldata.ShortUrl)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fmt.Printf("Record2 : %+v\n", surldata2)
+
+	if surldata2.LongUrl != surldata.LongUrl || surldata2.ShortUrl != surldata.ShortUrl {
+		t.Error("Incorrect data")
+		t.FailNow()
+	}
 }

@@ -99,7 +99,7 @@ func setSurl(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getSurl(w http.ResponseWriter, r *http.Request) {
+func getSurlByLongUrl(w http.ResponseWriter, r *http.Request) {
 
 	key := r.URL.Query().Get("longurl")
 	if key == "" {
@@ -107,15 +107,6 @@ func getSurl(w http.ResponseWriter, r *http.Request) {
 		//fmt.Fprintf(w, "missing query param: sourcepath\n")
 		w.WriteHeader(http.StatusBadRequest)
 		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing query param: longurl"}
-		json.NewEncoder(w).Encode(er)
-		return
-	}
-
-	if surl_db == nil {
-		errmsg := "DB error"
-		fmt.Println(errmsg)
-		w.WriteHeader(http.StatusInternalServerError)
-		er := ErrorResponse{Code: http.StatusInternalServerError, Message: errmsg}
 		json.NewEncoder(w).Encode(er)
 		return
 	}
@@ -132,17 +123,77 @@ func getSurl(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("%#v\n", result)
 
-	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func getSurlByShortUrl(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Query().Get("shorturl")
+	if key == "" {
+		// note: if they pass in like ?param1=&param2= param1 will also be ""
+		//fmt.Fprintf(w, "missing query param: sourcepath\n")
+		w.WriteHeader(http.StatusBadRequest)
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing query param: shorturl"}
+		json.NewEncoder(w).Encode(er)
+		return
+	}
+
+	result, err := db.GetSurlIdByShortUrl(surl_db, key)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s - %s\n", err.Error(), key)
+		fmt.Println(errMsg)
+		w.WriteHeader(http.StatusNotFound)
+		er := ErrorResponse{Code: http.StatusNotFound, Message: errMsg}
+		json.NewEncoder(w).Encode(er)
+		return
+	}
+
+	fmt.Printf("%#v\n", result)
+
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func visitByShortUrl(w http.ResponseWriter, r *http.Request) {
+	// FYI
+	// https://www.stackhawk.com/blog/golang-open-redirect-guide-examples-and-prevention/
+	// https://labex.io/tutorials/go-how-to-implement-effective-http-redirects-in-go-435277
+	// https://labex.io/tutorials/go-how-to-design-http-request-handlers-450884
+
+	key := r.URL.Query().Get("shorturl")
+	if key == "" {
+		// note: if they pass in like ?param1=&param2= param1 will also be ""
+		//fmt.Fprintf(w, "missing query param: sourcepath\n")
+		w.WriteHeader(http.StatusBadRequest)
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing query param: shorturl"}
+		json.NewEncoder(w).Encode(er)
+		return
+	}
+
+	result, err := db.GetSurlIdByShortUrl(surl_db, key)
+	if err != nil {
+		errMsg := fmt.Sprintf("%s - %s\n", err.Error(), key)
+		fmt.Println(errMsg)
+		w.WriteHeader(http.StatusNotFound)
+		er := ErrorResponse{Code: http.StatusNotFound, Message: errMsg}
+		json.NewEncoder(w).Encode(er)
+		return
+	}
+
+	fmt.Printf("%#v\n", result)
+
+	http.Redirect(w, r, result.LongUrl, http.StatusFound)
 }
 
 const Port = "port"
-
-//const EnvFlag string = "env"
 
 func main() {
 
@@ -168,8 +219,13 @@ func main() {
 	// curl -X POST localhost:8282/setsurl -d '{"LongUrl":"https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md"}'
 	myRouter.HandleFunc("/setsurl", setSurl).Methods("POST")
 
-	// curl -X GET localhost:8282/getsurl?longurl=https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md
-	myRouter.HandleFunc("/getsurl", getSurl).Methods("GET")
+	// curl -X GET localhost:8282/getsurlbylongurl?longurl=https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md
+	myRouter.HandleFunc("/getsurlbylongurl", getSurlByLongUrl).Methods("GET")
+	// curl -X GET localhost:8282/getsurlbyshorturl?shorturl=https://go/23bn0CGuIfB
+	myRouter.HandleFunc("/getsurlbyshorturl", getSurlByShortUrl).Methods("GET")
+	// curl -X GET localhost:8282/visitbyshorturl?shorturl=https://go/23bn0CGuIfB
+	// OR just paste to browser -> localhost:8282/visitbyshorturl?shorturl=https://go/23bn0CGuIfB
+	myRouter.HandleFunc("/visitbyshorturl", visitByShortUrl).Methods("GET")
 
 	host := "0.0.0.0:" + port
 	fmt.Println(host + " up and listening")

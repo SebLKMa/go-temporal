@@ -122,3 +122,30 @@ func GetSurlIdByLongUrl(db *sql.DB, longUrl string) (dm.SurlId, error) {
 	*/
 	return data, nil
 }
+
+func GetSurlIdByShortUrl(db *sql.DB, shortUrl string) (dm.SurlId, error) {
+	fmt.Println(shortUrl)
+	s := `
+	SELECT 
+    *
+	FROM surl_id
+	WHERE short_url = $1 
+	`
+	var data dm.SurlId
+	r := db.QueryRow(s, shortUrl)
+	err := r.Scan(
+		&data.IndexID,
+		&data.UniqueID,
+		&data.LongUrl,
+		&data.ShortUrl,
+		&data.ExpiresOn,
+		&data.CreatedOn,
+		&data.ModifiedOn,
+	)
+	if err != nil {
+		return data, err
+	}
+	fmt.Println(data)
+
+	return data, nil
+}
