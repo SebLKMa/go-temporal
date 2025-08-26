@@ -64,8 +64,8 @@ func setSurl(w http.ResponseWriter, r *http.Request) {
 	if surl_db == nil {
 		errmsg := "DB error"
 		fmt.Println(errmsg)
-		w.WriteHeader(http.StatusBadRequest)
-		er := ErrorResponse{Code: http.StatusBadRequest, Message: errmsg}
+		w.WriteHeader(http.StatusInternalServerError)
+		er := ErrorResponse{Code: http.StatusInternalServerError, Message: errmsg}
 		json.NewEncoder(w).Encode(er)
 		return
 	}
@@ -73,7 +73,15 @@ func setSurl(w http.ResponseWriter, r *http.Request) {
 	_, err = db.GetSurlIdByLongUrl(surl_db, longUrl)
 	if err != nil {
 		// not found, generate unique id for new record
-		src.UniqueID = ut.GenId()
+		src.UniqueID = ut.GenId(longUrl)
+		if src.UniqueID == "" {
+			errmsg := "Error generating short id"
+			fmt.Println(errmsg)
+			w.WriteHeader(http.StatusInternalServerError)
+			er := ErrorResponse{Code: http.StatusInternalServerError, Message: errmsg}
+			json.NewEncoder(w).Encode(er)
+			return
+		}
 		src.ShortUrl = "https://go/" + src.UniqueID
 		src.ExpiresOn = time.Now().AddDate(2, 0, 0) // expires in 2 years
 	}
@@ -106,8 +114,8 @@ func getSurl(w http.ResponseWriter, r *http.Request) {
 	if surl_db == nil {
 		errmsg := "DB error"
 		fmt.Println(errmsg)
-		w.WriteHeader(http.StatusBadRequest)
-		er := ErrorResponse{Code: http.StatusBadRequest, Message: errmsg}
+		w.WriteHeader(http.StatusInternalServerError)
+		er := ErrorResponse{Code: http.StatusInternalServerError, Message: errmsg}
 		json.NewEncoder(w).Encode(er)
 		return
 	}
@@ -157,10 +165,10 @@ func main() {
 	myRouter.HandleFunc("/ping", ping).Methods("GET")
 
 	// curl -X POST localhost:8282/setsurl -d '{"LongUrl":"https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html?mc_cid=66407ad02b&mc_eid=41cad80de5", "Config":{"ThresholdPriority1":0.65, "ThresholdPriority2":0.78, "AcquisitionWindow":5, "WindowPercent":60, "UseSensorAI":false, "UseServerAI":false}}'
-	// curl -X POST localhost:8282/setsurl -d '{"LongUrl":"https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html?mc_cid=66407ad02b&mc_eid=41cad80de5"}'
+	// curl -X POST localhost:8282/setsurl -d '{"LongUrl":"https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md"}'
 	myRouter.HandleFunc("/setsurl", setSurl).Methods("POST")
 
-	// curl -X GET localhost:8282/getsurl?longurl=https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html?mc_cid=66407ad02b&mc_eid=41cad80de5
+	// curl -X GET localhost:8282/getsurl?longurl=https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md
 	myRouter.HandleFunc("/getsurl", getSurl).Methods("GET")
 
 	host := "0.0.0.0:" + port

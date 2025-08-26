@@ -17,9 +17,13 @@ func TestCreateOrUpdateSurlId(t *testing.T) {
 	surl_test_db := dbconn.Connect()
 	defer surl_test_db.Close()
 
-	longUrl := "https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html?mc_cid=66407ad02b&mc_eid=41cad80de5"
+	longUrl := "https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md"
 	var data dm.SurlId
-	data.UniqueID = ut.GenId()
+	data.UniqueID = ut.GenId(longUrl)
+	if data.UniqueID == "" {
+		t.Error("Error in processing URL")
+		t.FailNow()
+	}
 	data.LongUrl = longUrl
 	data.ShortUrl = "https://go/" + data.UniqueID
 	data.ExpiresOn = time.Now().AddDate(2, 0, 0) // expires in 2 years
@@ -44,7 +48,7 @@ func TestGetSurlId(t *testing.T) {
 	surl_test_db := dbconn.Connect()
 	defer surl_test_db.Close()
 
-	longUrl := "https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html?mc_cid=66407ad02b&mc_eid=41cad80de5"
+	longUrl := "https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md"
 
 	surldata, err := db.GetSurlIdByLongUrl(surl_test_db, longUrl)
 	if err != nil {
