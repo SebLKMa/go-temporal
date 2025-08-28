@@ -22,3 +22,6 @@ To test auto-recovery:
 ## References
 
 https://learn.temporal.io/getting_started/go/first_program_in_go/  
+
+
+## [An example of URL Shortening Service](./README_surl.md)

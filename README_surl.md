@@ -76,7 +76,7 @@ A reference diagram from [bytebytego](https://bytebytego.com/courses/system-desi
 To cater to requests traffic demand, we consider using [load balancer](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/).  
 
 
-```
+```json
 POST /setsurl
 Content-Type: application/json
 
@@ -85,7 +85,7 @@ Content-Type: application/json
   "expiry_hrs": "1"
 }
 ```
-```
+```json
 Response:
 {
   "unique_id": "********",
@@ -94,16 +94,42 @@ Response:
   "short_url" "https://go/*********"
 }
 ```
-```
+```json
 GET /visit?short_url=https://go/*********
 ```
 
 Redirect 301 (client should update cache), 302 Found or 307 Temporary Redirect for temporary URL changes.
 We will use server-side redirect 302:  
-```
+```json
 Response:
 HTTP/1.1 301 Moved Permanently
 Location: https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host
 Content-Length: 0
 ```
+
+### Error Response
+
+Consider to standardize REST API error handling by using the IETF devised [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807), which creates a generalized error-handling schema.
+
+This schema is composed of five parts:  
+* type – a URI identifier that categorizes the error
+* title – a brief, human-readable message about the error
+* status – the HTTP response code (optional)
+* detail – a human-readable explanation of the error
+* instance – a URI that identifies the specific occurrence of the error
+Example:  
+```json
+{
+    "type": "/errors/incorrect-user-pass",
+    "title": "Incorrect username or password.",
+    "status": 401,
+    "detail": "Authentication failed due to incorrect username or password.",
+    "instance": "/login/log/abc123"
+}
+```
+
+### References
+
+https://www.baeldung.com/rest-api-error-handling-best-practices  
+https://restfulapi.net/http-status-codes/  
 
