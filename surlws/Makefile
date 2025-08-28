@@ -2,13 +2,11 @@ staging=../staging/surl
 bin=gosurlws
 LD_VERSION=V1
 LD_BUILDTIME=`date +%FT%T%z`
-# increment DOCKTAG for each rpush
 dock_tag=$(DOCKTAG)
 dock_file=../Dockerfile-gosurlws
 dock_file_arm64=../Dockerfile-gosurlws-arm64
 dock_name=gosurlws
 dock_image_arm64=gosurlws-arm64
-#dock_image_mbm2_utm=pd-backend-goblobhttp-macbookm2-utm
 dock_hub=local#pdntu.azurecr.io
 dock_env=.env
 dock_internal_port=8181
@@ -22,11 +20,15 @@ define newline
 endef
 
 check_args:
-ifndef DOCKTAG
-	$(error ${newline}Usage:${newline}      make -f Makefile <command> DOCKTAG=<version>${newline}Please provide DOCKTAG argument)
-else
-	@echo "docker image tag version ${dock_tag} used in make"
+ifeq ($(dock_tag),)
+dock_tag := 0.1
 endif
+# Using default above
+#ifndef DOCKTAG
+#	$(error ${newline}Usage:${newline}      make -f Makefile <command> DOCKTAG=<version>${newline}Please provide DOCKTAG argument)
+#else
+#	@echo "docker image tag version ${dock_tag} used in make"
+#endif
 
 stage-amd:
 	@echo "staging local as amd64: " ${staging}

@@ -133,3 +133,21 @@ Example:
 https://www.baeldung.com/rest-api-error-handling-best-practices  
 https://restfulapi.net/http-status-codes/  
 
+## Build and run surl sample
+
+```sh
+make docker-clean-arm64
+
+make docker-build-arm64
+
+make docker-runlocal-arm64
+```
+
+Paste this to browser:
+```sh
+localhost:8282/visitbyshorturl?shorturl=https://go/23bn0CGuIfB
+```
+
+```sh
+make docker-stop
+```
