@@ -68,7 +68,14 @@ char(n)	                    n
 varchar(n)	                n  
 text                        unlimited  
 ```
-## API Design
+## System Architecture and API Design
+
+![Architecture](./surlws/surl_arch.png) 
+A reference diagram from [bytebytego](https://bytebytego.com/courses/system-design-interview/design-a-url-shortener)
+
+To cater to requests traffic demand, we consider using [load balancer](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/).  
+
+
 ```
 POST /setsurl
 Content-Type: application/json
