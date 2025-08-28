@@ -50,7 +50,7 @@ pointer: 8 bytes on a 64-bit system, 4 bytes on a 32-bit system
 
 ### Estimating Storage
 #### [Postgres data types](https://www.promotic.eu/en/pmdoc/Subsystems/Db/Postgres/DataTypes.htm)
-
+```sh
 bigint                      8  
 integer	                    4  
 smallint	                2  
@@ -67,37 +67,36 @@ timestamptz (precision)	    8
 char(n)	                    n  
 varchar(n)	                n  
 text                        unlimited  
-
+```
 ## API Design
+```
+POST /setsurl
+Content-Type: application/json
 
-    ```
-    POST /setsurl
-    Content-Type: application/json
+{
+  "long_url": "https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host",
+  "expiry_hrs": "1"
+}
+```
+```
+Response:
+{
+  "unique_id": "********",
+  "long_url": "https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host",
+  "expiry_hrs": "1",
+  "short_url" "https://go/*********"
+}
+```
+```
+GET /visit?short_url=https://go/*********
+```
 
-    {
-      "long_url": "https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host",
-      "expiry_hrs": "1"
-    }
-    ```
-    ```
-    Response:
-    {
-      "unique_id": "********",
-      "long_url": "https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host",
-      "expiry_hrs": "1",
-      "short_url" "https://go/*********"
-    }
-    ```
+Redirect 301 (client should update cache), 302 Found or 307 Temporary Redirect for temporary URL changes.
+We will use server-side redirect 302:  
+```
+Response:
+HTTP/1.1 301 Moved Permanently
+Location: https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host
+Content-Length: 0
+```
 
-    ```
-    GET /visit?short_url=https://go/*********
-    ```
-    
-    Redirect 301 (client should update cache), 302 Found or 307 Temporary Redirect for temporary URL changes.
-    We will use server-side redirect 302:  
-    ```
-    Response:
-    HTTP/1.1 301 Moved Permanently
-    Location: https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host
-    Content-Length: 0
-    ```
