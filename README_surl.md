@@ -76,7 +76,7 @@ A reference diagram from [bytebytego](https://bytebytego.com/courses/system-desi
 To cater to requests traffic demand, we consider using [load balancer](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/).  
 
 
-```json
+```
 POST /setsurl
 Content-Type: application/json
 
@@ -85,7 +85,7 @@ Content-Type: application/json
   "expiry_hrs": "1"
 }
 ```
-```json
+```
 Response:
 {
   "unique_id": "********",
@@ -94,13 +94,13 @@ Response:
   "short_url" "https://go/*********"
 }
 ```
-```json
+```
 GET /visit?short_url=https://go/*********
 ```
 
 Redirect 301 (client should update cache), 302 Found or 307 Temporary Redirect for temporary URL changes.
 We will use server-side redirect 302:  
-```json
+```
 Response:
 HTTP/1.1 301 Moved Permanently
 Location: https://stackoverflow.com/questions/36279253/go-compiled-binary-wont-run-in-an-alpine-docker-container-on-ubuntu-host
