@@ -1,13 +1,24 @@
 # go-temporal
 Applications using temporal for fault tolerance.
 
-## fundtransfer
+Go to your temporal cli directory,  
 ```sh
-temporal server start-dev --db-filename your_temporal.db --ui-port 8080
+./temporal server start-dev --db-filename your_temporal.db --ui-port 8080
 ```
 
+## fundtransfer
+
+### Start the workflow
+A workflow contains the activity tasks, e.g. withdraw, deposit etc.  
+Starting a workflow enqueues the tasks.  
 ```sh
 go run start/main.go
+```
+
+### Start the worker
+Worker executes the tasks from the queue.  
+```sh
+go run worker/main.go
 ```
 
 ### Test transaction recovery
