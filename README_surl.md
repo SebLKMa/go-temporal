@@ -133,6 +133,73 @@ Example:
 https://www.baeldung.com/rest-api-error-handling-best-practices  
 https://restfulapi.net/http-status-codes/  
 
+## URL shortening algorithm
+Credits to:  
+https://www.reddit.com/r/golang/comments/15ai4sb/what_is_base62_conversion_checking_my_own/  
+
+### What is base62 conversion? Checking my own understanding.
+
+Ran into my own limited understanding of base62 conversion while building out a URL shortener in Go and wanted to check my understanding by posting this. :)  
+
+Base62 is a common encoding scheme that's perfect for short URL services and compact data storage.  
+
+It gets its names from the sixty-two characters used for encoding. Those characters are [0-9] 10 + [a-z] 26 + [A-Z] 26 = 62. To convert a decimal to base62 you use long division to divide the decimal by sixty-two. Then you take the remainder and map it to the character that represents it by locating its position within the base62 digits.  
+
+### Example: Convert 123 to base62
+
+#### Step 1: Divide the decimal by 62 until the quotient is zero and keep track of the remainders.
+
+123 ÷ 62 = 1 quotient 61 remainder  
+
+1 ÷ 62 = 0 quotient 1 remainder  
+
+#### Step 2: Use the remainder to map to the base62 character by its position
+
+61 = Z  
+
+The base62 system starts its index at zero, so the last character Z is at position sixty-one  
+
+1 = 1  
+
+Therefore, 123 converted to base62 is 1Z.  
+
+When combining the base62 characters you go from right to left to match the decimal positions.  
+
+### Base62 back to a decimal
+
+#### Step 1: Identify their position value in the base62 system
+
+1 = 1st position  
+
+Z = 61st position  
+
+#### Step 2: Calculate the powers of 62
+
+The calculation of the appropriate power of 62 for each base-62 digit is based on its position.  
+
+You find the power of each digit by taking the length of the base62 number minus the digit's position in the number and then subtract 1.  
+
+Formula: len(base62) -i -1  
+
+1Z = length of 2  
+
+Z's power of 62 eq 2 - 1 - 1 = 0  
+
+1's power of 62 eq 2 - 0 - 1 = 1  
+
+#### Step 3: Convert back to decimals  
+
+1 * 61^1 = 61  
+
+62 * 62^0 = 62  
+
+61+62 = 123  
+
+Here's some sample code in #golang for reference. :)
+https://play.golang.com/p/DmFYZXWdzDU
+
+
+
 ## Build and run surl sample
 
 ```sh
