@@ -11,3 +11,7 @@ type SurlId struct {
 	CreatedOn  time.Time `json:"CreatedOn"`
 	ModifiedOn time.Time `json:"ModifiedOn"`
 }
+
+type InputString struct {
+	Input string `json:"Input"`
+}

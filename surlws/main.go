@@ -100,7 +100,7 @@ func setSurl(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSurlByLongUrl(w http.ResponseWriter, r *http.Request) {
-
+	// By query param
 	key := r.URL.Query().Get("longurl")
 	if key == "" {
 		// note: if they pass in like ?param1=&param2= param1 will also be ""
@@ -132,12 +132,26 @@ func getSurlByLongUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func getSurlByShortUrl(w http.ResponseWriter, r *http.Request) {
-	key := r.URL.Query().Get("shorturl")
-	if key == "" {
-		// note: if they pass in like ?param1=&param2= param1 will also be ""
-		//fmt.Fprintf(w, "missing query param: sourcepath\n")
+	// By query param
+	/*
+		key := r.URL.Query().Get("shorturl")
+	*/
+
+	// By json struct
+	var src dm.InputString
+	err := json.NewDecoder(r.Body).Decode(&src)
+	if err != nil {
+		errmsg := err.Error()
+		fmt.Println(errmsg)
 		w.WriteHeader(http.StatusBadRequest)
-		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing query param: shorturl"}
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: "JSON input error: " + errmsg}
+		json.NewEncoder(w).Encode(er)
+		return
+	}
+	key := src.Input
+	if key == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing input key"}
 		json.NewEncoder(w).Encode(er)
 		return
 	}
@@ -168,12 +182,26 @@ func visitByShortUrl(w http.ResponseWriter, r *http.Request) {
 	// https://labex.io/tutorials/go-how-to-implement-effective-http-redirects-in-go-435277
 	// https://labex.io/tutorials/go-how-to-design-http-request-handlers-450884
 
+	// By query param
 	key := r.URL.Query().Get("shorturl")
+
+	// By json string not possible in browser
+	/*
+		var src dm.InputString
+		err := json.NewDecoder(r.Body).Decode(&src)
+		if err != nil {
+			errmsg := err.Error()
+			fmt.Println(errmsg)
+			w.WriteHeader(http.StatusBadRequest)
+			er := ErrorResponse{Code: http.StatusBadRequest, Message: "JSON input error: " + errmsg}
+			json.NewEncoder(w).Encode(er)
+			return
+		}
+		key := src.Input
+	*/
 	if key == "" {
-		// note: if they pass in like ?param1=&param2= param1 will also be ""
-		//fmt.Fprintf(w, "missing query param: sourcepath\n")
 		w.WriteHeader(http.StatusBadRequest)
-		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing query param: shorturl"}
+		er := ErrorResponse{Code: http.StatusBadRequest, Message: "missing input key"}
 		json.NewEncoder(w).Encode(er)
 		return
 	}
@@ -221,7 +249,8 @@ func main() {
 
 	// curl -X GET localhost:8282/getsurlbylongurl?longurl=https://github.com/ardanlabs/gotraining/blob/master/topics/go/design/composition/README.md
 	myRouter.HandleFunc("/getsurlbylongurl", getSurlByLongUrl).Methods("GET")
-	// curl -X GET localhost:8282/getsurlbyshorturl?shorturl=https://go/23bn0CGuIfB
+	// By query param, curl -X GET localhost:8282/getsurlbyshorturl?shorturl=https://go/23bn0CGuIfB
+	// By json, curl -X GET localhost:8282/getsurlbyshorturl -d '{"Input": "https://go/23bn0CGuIfB"}'
 	myRouter.HandleFunc("/getsurlbyshorturl", getSurlByShortUrl).Methods("GET")
 	// curl -X GET localhost:8282/visitbyshorturl?shorturl=https://go/23bn0CGuIfB
 	// OR just paste to browser -> localhost:8282/visitbyshorturl?shorturl=https://go/23bn0CGuIfB
