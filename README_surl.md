@@ -68,6 +68,9 @@ char(n)	                    n
 varchar(n)	                n  
 text                        unlimited  
 ```
+### References
+[Back-of-the-envelope estimation](https://bytebytego.com/courses/system-design-interview/back-of-the-envelope-estimation)
+
 ## System Architecture and API Design
 
 ![Architecture](./surlws/surl_arch.png) 
