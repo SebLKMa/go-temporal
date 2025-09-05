@@ -1,6 +1,6 @@
 /*
 Login to check your tables:
-psql "host=localhost port=5432 dbname=pddb user=pduser password=pduser"
+psql "host=localhost port=5432 dbname=<your_db> user=<username> password=<password>"
 \dt
 \d
 */
